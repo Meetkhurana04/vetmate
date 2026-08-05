@@ -1,0 +1,6 @@
+USERS_COLLECTION = "users"
+DOCTORS_COLLECTION = "doctors"
+APPOINTMENTS_COLLECTION = "appointments"
+DOCTOR_SCHEDULES_COLLECTION = "doctor_schedules"
+DOCTOR_LEAVES_COLLECTION = "doctor_leaves"
+APPOINTMENT_LOGS_COLLECTION = "appointment_logs"
