@@ -10,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final int? maxLength;
 
   const CustomTextField({
     super.key,
@@ -21,6 +22,7 @@ class CustomTextField extends StatefulWidget {
     this.prefixIcon,
     this.validator,
     this.onChanged,
+    this.maxLength,
   });
 
   @override
@@ -38,9 +40,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
       keyboardType: widget.keyboardType,
       validator: widget.validator,
       onChanged: widget.onChanged,
+      maxLength: widget.maxLength,
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hint,
+        counterText: '',
         prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
         suffixIcon: widget.isPassword
             ? IconButton(

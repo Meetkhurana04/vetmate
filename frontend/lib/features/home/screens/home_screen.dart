@@ -36,6 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    ref.read(homeTabIndexProvider.notifier).state = 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(bookingProvider.notifier).fetchAppointments();
       ref.read(notificationProvider.notifier).fetchNotifications();
@@ -580,9 +581,24 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                             color: AppTheme.textDark,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: () => Navigator.pop(ctx),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (items.isNotEmpty)
+                              TextButton.icon(
+                                onPressed: () {
+                                  ref
+                                      .read(notificationProvider.notifier)
+                                      .clearNotifications();
+                                },
+                                icon: const Icon(Icons.clear_all_rounded, size: 18),
+                                label: const Text('Clear all'),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () => Navigator.pop(ctx),
+                            ),
+                          ],
                         ),
                       ],
                     ),

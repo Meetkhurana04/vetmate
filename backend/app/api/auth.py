@@ -93,3 +93,7 @@ def manage_leave(data: DoctorLeaveRequest, current_user=Depends(get_current_user
 @router.get("/notifications")
 def get_notifications(current_user=Depends(get_current_user)):
     return auth_service.get_notifications(current_user)
+
+@router.post("/notifications/clear")
+def clear_notifications(current_user=Depends(get_current_user)):
+    return auth_service.clear_notifications(current_user)

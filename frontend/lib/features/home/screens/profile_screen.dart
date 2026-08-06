@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vetmate/core/theme/app_theme.dart';
 import 'package:vetmate/core/constants/app_constants.dart';
+import 'package:vetmate/core/validators/validators.dart';
 import 'package:vetmate/features/auth/providers/auth_provider.dart';
 import 'package:vetmate/features/auth/models/auth_state.dart';
 import 'package:vetmate/features/location/providers/location_provider.dart';
@@ -241,19 +242,26 @@ class ProfileScreen extends ConsumerWidget {
               content: SingleChildScrollView(
                 child: Form(
                   key: formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextFormField(
                         controller: nameController,
                         decoration: const InputDecoration(labelText: 'Name'),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        validator: validateName,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: phoneController,
-                        decoration: const InputDecoration(labelText: 'Phone'),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone',
+                          counterText: '',
+                        ),
+                        keyboardType: TextInputType.phone,
+                        maxLength: kPhoneLength,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        validator: validatePhone,
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -263,7 +271,7 @@ class ProfileScreen extends ConsumerWidget {
                               controller: latController,
                               decoration: const InputDecoration(labelText: 'Latitude'),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                              validator: validateLatitude,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -272,7 +280,7 @@ class ProfileScreen extends ConsumerWidget {
                               controller: lngController,
                               decoration: const InputDecoration(labelText: 'Longitude'),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                              validator: validateLongitude,
                             ),
                           ),
                         ],

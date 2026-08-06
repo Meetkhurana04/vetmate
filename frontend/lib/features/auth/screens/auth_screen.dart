@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vetmate/core/constants/app_constants.dart';
 import 'package:vetmate/core/theme/app_theme.dart';
+import 'package:vetmate/core/validators/validators.dart';
 import 'package:vetmate/core/widgets/custom_button.dart';
 import 'package:vetmate/core/widgets/custom_text_field.dart';
 import 'package:vetmate/features/auth/models/auth_state.dart';
@@ -144,6 +145,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -253,11 +255,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           hint: 'Enter your email',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Email is required';
-            if (!val.contains('@')) return 'Enter a valid email';
-            return null;
-          },
+          validator: validateEmail,
         ),
         const SizedBox(height: 18),
         CustomTextField(
@@ -266,11 +264,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           hint: 'Enter your password',
           prefixIcon: Icons.lock_outline,
           isPassword: true,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Password is required';
-            if (val.length < 6) return 'Password must be at least 6 characters';
-            return null;
-          },
+          validator: validatePassword,
         ),
         Align(
           alignment: Alignment.centerRight,
@@ -306,10 +300,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           label: 'Full Name',
           hint: 'Enter your full name',
           prefixIcon: Icons.person_outline,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Name is required';
-            return null;
-          },
+          validator: validateName,
         ),
         const SizedBox(height: 18),
         CustomTextField(
@@ -318,11 +309,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           hint: 'Enter your email',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Email is required';
-            if (!val.contains('@')) return 'Enter a valid email';
-            return null;
-          },
+          validator: validateEmail,
         ),
         const SizedBox(height: 18),
         CustomTextField(
@@ -331,10 +318,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           hint: 'Enter your phone number',
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Phone number is required';
-            return null;
-          },
+          maxLength: kPhoneLength,
+          validator: validatePhone,
         ),
         const SizedBox(height: 18),
         CustomTextField(
@@ -343,11 +328,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           hint: 'Create password',
           prefixIcon: Icons.lock_outline,
           isPassword: true,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Password is required';
-            if (val.length < 6) return 'Password must be at least 6 characters';
-            return null;
-          },
+          validator: validatePassword,
         ),
         const SizedBox(height: 18),
         CustomTextField(
@@ -374,11 +355,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 hint: 'e.g. 26.9124',
                 prefixIcon: Icons.location_searching_rounded,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return 'Required';
-                  if (double.tryParse(val) == null) return 'Invalid';
-                  return null;
-                },
+                validator: validateLatitude,
               ),
             ),
             const SizedBox(width: 12),
@@ -389,11 +366,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 hint: 'e.g. 75.7873',
                 prefixIcon: Icons.location_searching_rounded,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return 'Required';
-                  if (double.tryParse(val) == null) return 'Invalid';
-                  return null;
-                },
+                validator: validateLongitude,
               ),
             ),
           ],

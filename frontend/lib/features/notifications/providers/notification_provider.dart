@@ -18,6 +18,10 @@ class NotificationRepository {
         .map((e) => NotificationModel.fromMap(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<void> clearNotifications() async {
+    await _httpService.post('/auth/notifications/clear');
+  }
 }
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
@@ -37,6 +41,13 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  Future<void> clearNotifications() async {
+    try {
+      await _repository.clearNotifications();
+      await fetchNotifications();
+    } catch (_) {}
   }
 }
 

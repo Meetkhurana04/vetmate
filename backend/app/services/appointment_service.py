@@ -299,8 +299,10 @@ class AppointmentService:
 
     def cancel_appointment(self, current_user, appointment_id: str):
         from bson import ObjectId
+        from datetime import datetime
         from fastapi import HTTPException, status
         from app.config.database import db
+        from app.constants.collections import NOTIFICATIONS_COLLECTION
         
         try:
             obj_id = ObjectId(appointment_id)
@@ -322,8 +324,37 @@ class AppointmentService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to cancel this appointment"
             )
-            
+
+        already_cancelled = appointment.get("status") == "CANCELLED"
         appointment_repository.cancel(appointment_id)
+
+        if not already_cancelled:
+            canceller_is_doctor = str(current_user["_id"]) == appointment.get("doctor_id")
+            if canceller_is_doctor:
+                recipient_id = appointment.get("patient_id")
+                other_name = "Patient"
+                message = (f"Your appointment with {appointment.get('doctor_name', 'Doctor')} on "
+                           f"{appointment.get('appointment_date', '')} at {appointment.get('start_time', '')} "
+                           f"was cancelled by the doctor.")
+            else:
+                recipient_id = appointment.get("doctor_id")
+                other_name = "Doctor"
+                message = (f"Your appointment with {appointment.get('doctor_name', 'Doctor')} on "
+                           f"{appointment.get('appointment_date', '')} at {appointment.get('start_time', '')} "
+                           f"was cancelled by the patient.")
+
+            if recipient_id:
+                db[NOTIFICATIONS_COLLECTION].insert_one({
+                    "user_id": recipient_id,
+                    "type": "APPOINTMENT_CANCELLED",
+                    "title": "Appointment cancelled",
+                    "message": message,
+                    "appointment_date": appointment.get("appointment_date", ""),
+                    "doctor_name": appointment.get("doctor_name", "Doctor"),
+                    "read": False,
+                    "created_at": datetime.now()
+                })
+
         return {"message": "Appointment cancelled successfully"}
 
 

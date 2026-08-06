@@ -281,4 +281,16 @@ class AuthService:
                 n["created_at"] = n["created_at"].isoformat()
         return notifications
 
+    def clear_notifications(self, current_user):
+        from app.config.database import db
+        from app.constants.collections import NOTIFICATIONS_COLLECTION
+
+        result = db[NOTIFICATIONS_COLLECTION].delete_many(
+            {"user_id": str(current_user["_id"])}
+        )
+        return {
+            "message": "Notifications cleared successfully",
+            "deleted": result.deleted_count,
+        }
+
 auth_service = AuthService()
