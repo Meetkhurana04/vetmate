@@ -4,6 +4,7 @@ from app.config.settings import settings
 from app.api.auth import router as auth_router
 from app.api.doctors import (router as doctor_router)
 from app.api.appointments import (router as appointment_router)
+from app.api.clinics import router as clinics_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -23,3 +24,4 @@ def health_check():
 app.include_router(doctor_router)
 app.include_router(appointment_router)
 app.include_router(auth_router)
+app.include_router(clinics_router)

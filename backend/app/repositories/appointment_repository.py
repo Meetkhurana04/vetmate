@@ -63,6 +63,18 @@ class AppointmentRepository:
             )
         )
 
+    def find_by_doctor(self, doctor_id: str):
+        return list(
+            db[APPOINTMENTS_COLLECTION].find(
+                {
+                    "doctor_id": doctor_id
+                }
+            ).sort(
+                "appointment_date",
+                1
+            )
+        )
+
     def cancel(self,appointment_id):
         return db[
             APPOINTMENTS_COLLECTION

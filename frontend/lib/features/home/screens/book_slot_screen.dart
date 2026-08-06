@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:vetmate/core/theme/app_theme.dart';
 import 'package:vetmate/core/widgets/custom_button.dart';
+import 'package:vetmate/features/home/screens/home_screen.dart';
+import 'package:vetmate/core/widgets/custom_monthly_calendar.dart';
 import 'package:vetmate/features/home/models/clinic_model.dart';
 import 'package:vetmate/features/home/providers/clinic_provider.dart';
 import 'package:vetmate/features/home/providers/booking_provider.dart';
@@ -19,43 +21,17 @@ class BookSlotScreen extends ConsumerStatefulWidget {
 }
 
 class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
-  int _selectedDateIndex = 0;
+  DateTime _selectedDate = DateTime.now();
   String? _selectedSlotId;
   String? _selectedSlotTime;
-
-  late final List<Map<String, dynamic>> _dates;
-
-  List<Map<String, dynamic>> _generateDates() {
-    final now = DateTime.now();
-    return List.generate(3, (index) {
-      final date = now.add(Duration(days: index));
-      String label = '';
-      if (index == 0) {
-        label = 'Today';
-      } else if (index == 1) {
-        label = 'Tomorrow';
-      } else {
-        label = 'Day After';
-      }
-
-      return {
-        'label': label,
-        'day': DateFormat('E').format(date),
-        'date': DateFormat('d MMM').format(date),
-        'dateTime': DateTime(date.year, date.month, date.day),
-      };
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _dates = _generateDates();
-    // Initialize slots in provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
           .read(bookingProvider.notifier)
-          .initializeSlotsForClinic(widget.clinicId);
+          .fetchSlotsForClinicAndDate(widget.clinicId, _selectedDate);
       ref.read(bookingProvider.notifier).resetBookingStatus();
     });
   }
@@ -63,7 +39,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
   void _handleBooking(ClinicModel clinic, BookingState bookingState) async {
     if (_selectedSlotId == null || _selectedSlotTime == null) return;
 
-    final selectedDate = _dates[_selectedDateIndex]['dateTime'] as DateTime;
+    final selectedDate = _selectedDate;
 
     final success = await ref
         .read(bookingProvider.notifier)
@@ -139,11 +115,9 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                 CustomButton(
                   text: 'View Appointments',
                   onPressed: () {
+                    ref.read(homeTabIndexProvider.notifier).state = 1;
                     Navigator.pop(context); // Close dialog
-                    context
-                        .pop(); // Pop booking screen (goes back to HomeScreen)
-                    // Note: In home_screen, tab index is managed. Clicking back goes to home,
-                    // but the user can navigate to Appointments tab.
+                    context.pop(); // Pop booking screen
                   },
                 ),
                 const SizedBox(height: 12),
@@ -320,79 +294,26 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Date Selection Row
-                  Row(
-                    children: List.generate(_dates.length, (index) {
-                      final dateItem = _dates[index];
-                      final isSelected = _selectedDateIndex == index;
-
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedDateIndex = index;
-                              // Reset slot selection when date changes
-                              _selectedSlotId = null;
-                              _selectedSlotTime = null;
-                            });
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(
-                              left: index == 0 ? 0 : 6,
-                              right: index == _dates.length - 1 ? 0 : 6,
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppTheme.primaryColor
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppTheme.primaryColor
-                                    : Colors.grey.shade200,
-                                width: 1.5,
-                              ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: AppTheme.primaryColor
-                                            .withOpacity(0.2),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  dateItem['day']!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected
-                                        ? Colors.white70
-                                        : AppTheme.textLight,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  dateItem['date']!,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppTheme.textDark,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
+                  // Date Selection Calendar
+                  CustomMonthlyCalendar(
+                    selectedDate: _selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 90)),
+                    highlightedDates: bookingState.myAppointments
+                        .where((apt) => apt.status == 'ACTIVE')
+                        .map((apt) => DateFormat('yyyy-MM-dd').format(apt.date))
+                        .toSet(),
+                    highlightColor: AppTheme.primaryColor,
+                    onDateSelected: (date) {
+                      setState(() {
+                        _selectedDate = date;
+                        _selectedSlotId = null;
+                        _selectedSlotTime = null;
+                      });
+                      ref
+                          .read(bookingProvider.notifier)
+                          .fetchSlotsForClinicAndDate(widget.clinicId, date);
+                    },
                   ),
                   const SizedBox(height: 28),
 
@@ -421,10 +342,27 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                   const SizedBox(height: 12),
 
                   // Slots Grid
-                  if (slots.isEmpty)
+                  if (bookingState.isLoadingSlots)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(
+                        child: CircularProgressIndicator(color: AppTheme.primaryColor),
+                      ),
+                    )
+                  else if (slots.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'No appointment slots available on this date.',
+                          style: TextStyle(
+                            color: AppTheme.textLight,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     )
                   else
                     GridView.builder(
@@ -449,15 +387,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                         Widget? suffixIcon;
                         String statusLabel = '';
 
-                        if (!slot.isAvailable) {
-                          // Lunch Break (1 PM - 2 PM) - Disabled
-                          bgColor = const Color(
-                            0xFFFFF3E0,
-                          ); // very soft light orange
-                          textColor = Colors.orange.shade800;
-                          borderColor = Colors.orange.shade100;
-                          statusLabel = 'Break';
-                        } else if (slot.isBooked) {
+                        if (slot.isBooked) {
                           // Already Booked - Disabled
                           bgColor = Colors.grey.shade100;
                           textColor = Colors.grey.shade400;
@@ -468,6 +398,14 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                             size: 11,
                             color: Colors.grey.shade400,
                           );
+                        } else if (!slot.isAvailable) {
+                          // Lunch Break (1 PM - 2 PM) - Disabled
+                          bgColor = const Color(
+                            0xFFFFF3E0,
+                          ); // very soft light orange
+                          textColor = Colors.orange.shade800;
+                          borderColor = Colors.orange.shade100;
+                          statusLabel = 'Break';
                         } else if (isSelected) {
                           // Selected by user
                           bgColor = AppTheme.primaryColor;
@@ -576,7 +514,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                           ),
                         ),
                         Text(
-                          '${_dates[_selectedDateIndex]['day']}, ${_dates[_selectedDateIndex]['date']} at $_selectedSlotTime',
+                          '${DateFormat('EEEE, d MMM').format(_selectedDate)} at $_selectedSlotTime',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

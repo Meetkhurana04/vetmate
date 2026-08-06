@@ -8,6 +8,11 @@ class AuthState extends Equatable {
   final String? refreshToken;
   final String? userRole;
   final String? userName;
+  final String? userEmail;
+  final String? userPhone;
+  final double? userLatitude;
+  final double? userLongitude;
+  final List<String>? userLeaves;
   final String? userId;
   final String? errorMessage;
 
@@ -17,6 +22,11 @@ class AuthState extends Equatable {
     this.refreshToken,
     this.userRole,
     this.userName,
+    this.userEmail,
+    this.userPhone,
+    this.userLatitude,
+    this.userLongitude,
+    this.userLeaves,
     this.userId,
     this.errorMessage,
   });
@@ -27,6 +37,11 @@ class AuthState extends Equatable {
     String? refreshToken,
     String? userRole,
     String? userName,
+    String? userEmail,
+    String? userPhone,
+    double? userLatitude,
+    double? userLongitude,
+    List<String>? userLeaves,
     String? userId,
     String? errorMessage,
   }) {
@@ -36,6 +51,11 @@ class AuthState extends Equatable {
       refreshToken: refreshToken ?? this.refreshToken,
       userRole: userRole ?? this.userRole,
       userName: userName ?? this.userName,
+      userEmail: userEmail ?? this.userEmail,
+      userPhone: userPhone ?? this.userPhone,
+      userLatitude: userLatitude ?? this.userLatitude,
+      userLongitude: userLongitude ?? this.userLongitude,
+      userLeaves: userLeaves ?? this.userLeaves,
       userId: userId ?? this.userId,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -48,6 +68,11 @@ class AuthState extends Equatable {
     refreshToken,
     userRole,
     userName,
+    userEmail,
+    userPhone,
+    userLatitude,
+    userLongitude,
+    userLeaves,
     userId,
     errorMessage,
   ];

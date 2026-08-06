@@ -18,7 +18,7 @@ class ClinicState extends Equatable {
   const ClinicState({
     this.allClinics = const [],
     this.filteredClinics = const [],
-    this.distanceFilter = 20.0, // default distance filter limit
+    this.distanceFilter = 50.0, // default distance filter limit (50.0 = View All)
     this.searchQuery = '',
     this.isLoading = false,
     this.errorMessage,
@@ -141,7 +141,7 @@ class ClinicNotifier extends StateNotifier<ClinicState> {
           clinic.doctorName.toLowerCase().contains(query) ||
           clinic.address.toLowerCase().contains(query);
 
-      final matchesDistance = (clinic.distance ?? 0.0) <= filterDist;
+      final matchesDistance = filterDist >= 50.0 || (clinic.distance ?? 0.0) <= filterDist;
 
       return matchesSearch && matchesDistance;
     }).toList();

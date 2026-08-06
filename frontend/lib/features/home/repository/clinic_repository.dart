@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:vetmate/core/services/http_service.dart';
 import 'package:vetmate/features/home/models/appointment_slot_model.dart';
 import 'package:vetmate/features/home/models/clinic_model.dart';
+import 'package:vetmate/features/home/models/appointment_model.dart';
 import 'package:vetmate/features/location/models/location_model.dart';
 
 class ClinicRepository {
@@ -58,8 +59,13 @@ class ClinicRepository {
     return ClinicModel.fromMap(data);
   }
 
-  Future<List<AppointmentSlot>> getClinicSlots(String clinicId) async {
-    final response = await _httpService.get('/clinics/$clinicId/slots');
+  Future<List<AppointmentSlot>> getClinicSlots(String clinicId, {String? date}) async {
+    final response = await _httpService.get(
+      '/clinics/$clinicId/slots',
+      queryParameters: {
+        if (date != null) 'date': date,
+      },
+    );
     final List<dynamic> data = jsonDecode(response.body);
     return data
         .map((map) => AppointmentSlot.fromJson(map as Map<String, dynamic>))
@@ -69,11 +75,41 @@ class ClinicRepository {
   Future<bool> lockSlot({
     required String clinicId,
     required String slotId,
+    required DateTime date,
+    required String slotTime,
   }) async {
     await _httpService.post(
       '/appointments/book',
-      body: {'clinicId': clinicId, 'slotId': slotId},
+      body: {
+        'clinicId': clinicId,
+        'slotId': slotId,
+        'date': date.toIso8601String().split('T')[0],
+        'time': slotTime,
+      },
     );
+    return true;
+  }
+
+  Future<List<AppointmentModel>> getMyAppointments() async {
+    final response = await _httpService.get('/appointments/my');
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((map) {
+      return AppointmentModel(
+        id: map['appointment_id'] ?? map['id'] ?? '',
+        clinicId: map['clinicId'] ?? '',
+        clinicName: map['clinicName'] ?? '',
+        doctorName: map['doctorName'] ?? '',
+        clinicImage: map['clinicImage'] ?? 'assets/images/happy_paws.png',
+        slotId: map['slotId'] ?? '',
+        slotTime: map['slotTime'] ?? map['start_time'] ?? '',
+        date: DateTime.parse(map['date'] ?? map['appointment_date'] ?? ''),
+        status: map['status'] ?? 'Confirmed',
+      );
+    }).toList();
+  }
+
+  Future<bool> cancelAppointment(String appointmentId) async {
+    await _httpService.post('/appointments/$appointmentId/cancel');
     return true;
   }
 }

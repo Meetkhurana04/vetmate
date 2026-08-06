@@ -73,11 +73,22 @@ class HttpService {
       String message;
       try {
         final parsed = jsonDecode(response.body);
-        message = parsed['message'] ?? parsed['error'] ?? 'API request failed';
+        final detail = parsed['detail'];
+        if (detail is List) {
+          try {
+            message = detail[0]['msg'].toString();
+          } catch (_) {
+            message = 'Validation error occurred';
+          }
+        } else if (detail != null) {
+          message = detail.toString();
+        } else {
+          message = (parsed['message'] ?? parsed['error'] ?? 'API request failed').toString();
+        }
       } catch (_) {
         message = 'Server returned status code ${response.statusCode}';
       }
-      throw HttpException(message);
+      throw Exception(message);
     }
   }
 }

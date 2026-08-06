@@ -44,3 +44,10 @@ def my_appointments(current_user=Depends(get_current_user)):
     return appointment_service.my_appointments(
         current_user
     )
+
+@router.post("/{appointment_id}/cancel")
+def cancel(appointment_id: str, current_user=Depends(get_current_user)):
+    return appointment_service.cancel_appointment(
+        current_user,
+        appointment_id
+    )

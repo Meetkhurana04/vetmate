@@ -5,6 +5,11 @@ class AppConstants {
   static const String keyUserRole = 'userRole';
   static const String keyUserName = 'userName';
   static const String keyUserId = 'userId';
+  static const String keyUserEmail = 'userEmail';
+  static const String keyUserPhone = 'keyUserPhone';
+  static const String keyUserLatitude = 'userLatitude';
+  static const String keyUserLongitude = 'userLongitude';
+  static const String keyUserLeaves = 'userLeaves';
 
   // Role names
   static const String roleDoctor = 'DOCTOR';
@@ -15,5 +20,5 @@ class AppConstants {
   static const double defaultLongitude = 75.7873;
 
   // Base URL for the dynamic backend API
-  static const String apiBaseUrl = 'http://192.168.5.253:8000';
+  static const String apiBaseUrl = 'http://10.0.2.2:8000';
 }

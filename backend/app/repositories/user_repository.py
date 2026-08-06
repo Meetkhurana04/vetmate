@@ -11,7 +11,7 @@ class UserRepository:
         result = db.users.insert_one(user)
         return result.inserted_id
 
-    def find_by_id(user_id: str):
+    def find_by_id(self, user_id: str):
         return db.users.find_one(
             {
                 "_id": ObjectId(user_id)

@@ -51,7 +51,7 @@ class DistanceSlider extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${value.toStringAsFixed(0)} km',
+                  value >= 50.0 ? 'View All' : '${value.toStringAsFixed(0)} km',
                   style: const TextStyle(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,
@@ -75,8 +75,8 @@ class DistanceSlider extends StatelessWidget {
             child: Slider(
               value: value,
               min: 1.0,
-              max: 20.0,
-              divisions: 19,
+              max: 50.0,
+              divisions: 49,
               onChanged: onChanged,
             ),
           ),
@@ -84,8 +84,8 @@ class DistanceSlider extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('1 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
-              Text('10 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
-              Text('20 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
+              Text('25 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
+              Text('View All', style: TextStyle(color: Colors.grey, fontSize: 11)),
             ],
           ),
         ],

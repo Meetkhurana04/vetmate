@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vetmate/core/services/http_service.dart';
 import 'package:vetmate/features/auth/models/auth_state.dart';
@@ -15,9 +16,29 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  Timer? _tokenRefreshTimer;
 
   AuthNotifier(this._repository) : super(const AuthState()) {
     restoreSession();
+  }
+
+  void _startTokenRefreshTimer() {
+    _tokenRefreshTimer?.cancel();
+    // Refresh token every 30 minutes
+    _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
+      refreshSessionToken();
+    });
+  }
+
+  void _stopTokenRefreshTimer() {
+    _tokenRefreshTimer?.cancel();
+    _tokenRefreshTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _stopTokenRefreshTimer();
+    super.dispose();
   }
 
   Future<void> restoreSession() async {
@@ -29,6 +50,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final userRole = session['userRole'];
       final userName = session['userName'];
       final userId = session['userId'];
+      final userEmail = session['userEmail'];
+      final userPhone = session['userPhone'];
+      final userLatitude = session['userLatitude'] != null ? double.tryParse(session['userLatitude']!) : null;
+      final userLongitude = session['userLongitude'] != null ? double.tryParse(session['userLongitude']!) : null;
 
       if (accessToken != null &&
           refreshToken != null &&
@@ -41,8 +66,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
           refreshToken: refreshToken,
           userRole: userRole,
           userName: userName,
+          userEmail: userEmail,
+          userPhone: userPhone,
+          userLatitude: userLatitude,
+          userLongitude: userLongitude,
           userId: userId,
         );
+        _startTokenRefreshTimer();
       } else {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
@@ -67,6 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         preSelectedRole: role,
       );
       state = result;
+      _startTokenRefreshTimer();
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -81,6 +112,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String phone,
     required String password,
     required String role,
+    double? latitude,
+    double? longitude,
   }) async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
@@ -90,8 +123,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
         phone: phone,
         password: password,
         role: role,
+        latitude: latitude,
+        longitude: longitude,
       );
       state = result;
+      _startTokenRefreshTimer();
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String phone,
+    double? latitude,
+    double? longitude,
+  }) async {
+    state = state.copyWith(status: AuthStatus.loading);
+    try {
+      final result = await _repository.updateProfile(
+        name: name,
+        phone: phone,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      state = result;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+
+  Future<void> toggleLeave(String dateStr, bool takeLeave) async {
+    state = state.copyWith(status: AuthStatus.loading);
+    try {
+      final action = takeLeave ? 'TAKE' : 'CANCEL';
+      final updatedLeaves = await _repository.manageLeave(dateStr, action);
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        userLeaves: updatedLeaves,
+      );
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -104,6 +180,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading);
     try {
       await _repository.clearSession();
+      _stopTokenRefreshTimer();
       state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (e) {
       state = state.copyWith(

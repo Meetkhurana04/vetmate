@@ -28,6 +28,16 @@ class LocationNotifier extends StateNotifier<AsyncValue<UserLocation>> {
     }
   }
 
+  void setTemporaryLocation(double latitude, double longitude) {
+    state = AsyncValue.data(
+      UserLocation(
+        latitude: latitude,
+        longitude: longitude,
+        cityName: 'Temporary Location',
+      ),
+    );
+  }
+
   void _uploadLocationToBackend(UserLocation location) {
     // Pretend to send to backend log
     print('Uploading Location...');

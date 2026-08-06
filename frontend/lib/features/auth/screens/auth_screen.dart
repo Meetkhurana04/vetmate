@@ -8,6 +8,7 @@ import 'package:vetmate/core/widgets/custom_button.dart';
 import 'package:vetmate/core/widgets/custom_text_field.dart';
 import 'package:vetmate/features/auth/models/auth_state.dart';
 import 'package:vetmate/features/auth/providers/auth_provider.dart';
+import 'package:vetmate/features/location/providers/location_provider.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -19,6 +20,7 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isRegistering = false;
+  bool _isDetectingLocation = false;
 
   // Controllers
   final _nameController = TextEditingController();
@@ -26,6 +28,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _latitudeController = TextEditingController();
+  final _longitudeController = TextEditingController();
 
   @override
   void dispose() {
@@ -34,7 +38,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _detectCoordinates() async {
+    setState(() {
+      _isDetectingLocation = true;
+    });
+    try {
+      final locNotifier = ref.read(locationProvider.notifier);
+      await locNotifier.fetchLocation(requestPermission: true);
+      final updatedLoc = ref.read(locationProvider).value;
+      if (updatedLoc != null) {
+        _latitudeController.text = updatedLoc.latitude.toString();
+        _longitudeController.text = updatedLoc.longitude.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Coordinates auto-detected successfully!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to detect coordinates: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDetectingLocation = false;
+        });
+      }
+    }
   }
 
   void _submit() {
@@ -42,6 +84,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final selectedRole = ref.read(roleProvider);
 
       if (_isRegistering) {
+        final isDoctor = selectedRole == AppConstants.roleDoctor;
         ref
             .read(authProvider.notifier)
             .register(
@@ -50,6 +93,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               phone: _phoneController.text.trim(),
               password: _passwordController.text.trim(),
               role: selectedRole,
+              latitude: isDoctor ? double.tryParse(_latitudeController.text.trim()) : null,
+              longitude: isDoctor ? double.tryParse(_longitudeController.text.trim()) : null,
             );
       } else {
         ref
@@ -317,6 +362,61 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               return 'Passwords do not match';
             return null;
           },
+        ),
+        const SizedBox(height: 18),
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: _latitudeController,
+                label: 'Latitude',
+                hint: 'e.g. 26.9124',
+                prefixIcon: Icons.location_searching_rounded,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (val) {
+                  if (val == null || val.isEmpty) return 'Required';
+                  if (double.tryParse(val) == null) return 'Invalid';
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: CustomTextField(
+                controller: _longitudeController,
+                label: 'Longitude',
+                hint: 'e.g. 75.7873',
+                prefixIcon: Icons.location_searching_rounded,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (val) {
+                  if (val == null || val.isEmpty) return 'Required';
+                  if (double.tryParse(val) == null) return 'Invalid';
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: _isDetectingLocation ? null : _detectCoordinates,
+            icon: _isDetectingLocation
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location_rounded, size: 18),
+            label: const Text('Auto-detect Coordinates'),
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
         ),
       ],
     );
