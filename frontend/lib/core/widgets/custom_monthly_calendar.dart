@@ -9,16 +9,16 @@ class CustomMonthlyCalendar extends StatefulWidget {
   final DateTime lastDate;
   final ValueChanged<DateTime> onDateSelected;
   final Set<String> highlightedDates; // Format: YYYY-MM-DD
-  final Color highlightColor;
+  final Color? highlightColor;
 
-  const CustomMonthlyCalendar({
+   const CustomMonthlyCalendar({
     super.key,
     required this.selectedDate,
     required this.firstDate,
     required this.lastDate,
     required this.onDateSelected,
     this.highlightedDates = const {},
-    this.highlightColor = AppTheme.primaryColor,
+    this.highlightColor,
   });
 
   @override
@@ -50,6 +50,7 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
   Widget build(BuildContext context) {
     final year = _currentMonth.year;
     final month = _currentMonth.month;
+    final highlight = widget.highlightColor ?? AppTheme.primaryColor;
 
     final firstDayOfMonth = DateTime(year, month, 1);
     final lastDayOfMonth = DateTime(year, month + 1, 0);
@@ -70,7 +71,7 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
         Center(
           child: Text(
             day,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: AppTheme.textLight,
@@ -114,13 +115,13 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
               color: isSelected
                   ? AppTheme.primaryColor
                   : isHighlighted
-                      ? widget.highlightColor.withOpacity(0.12)
+                      ? highlight.withValues(alpha: 0.12)
                       : Colors.transparent,
               border: Border.all(
                 color: isSelected
                     ? AppTheme.primaryColor
                     : isHighlighted
-                        ? widget.highlightColor.withOpacity(0.5)
+                        ? highlight.withValues(alpha: 0.5)
                         : Colors.transparent,
                 width: 1.5,
               ),
@@ -135,11 +136,11 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
                       fontSize: 13,
                       fontWeight: isSelected || isHighlighted ? FontWeight.bold : FontWeight.normal,
                       color: !isEnabled
-                          ? Colors.grey.shade300
+                          ? AppTheme.textLight
                           : isSelected
                               ? Colors.white
                               : isHighlighted
-                                  ? widget.highlightColor
+                                  ? highlight
                                   : AppTheme.textDark,
                     ),
                   ),
@@ -151,7 +152,7 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
                       width: 4,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: widget.highlightColor,
+                        color: highlight,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -168,12 +169,12 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: AppTheme.cardBorderColor, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppTheme.tintColor,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -186,7 +187,7 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
             children: [
               IconButton(
                 onPressed: _prevMonth,
-                icon: const Icon(Icons.chevron_left_rounded, color: AppTheme.textDark),
+                icon: Icon(Icons.chevron_left_rounded, color: AppTheme.textDark),
               ),
               Text(
                 monthLabel,
@@ -198,7 +199,7 @@ class _CustomMonthlyCalendarState extends State<CustomMonthlyCalendar> {
               ),
               IconButton(
                 onPressed: _nextMonth,
-                icon: const Icon(Icons.chevron_right_rounded, color: AppTheme.textDark),
+                icon: Icon(Icons.chevron_right_rounded, color: AppTheme.textDark),
               ),
             ],
           ),

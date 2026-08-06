@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vetmate/core/theme/app_theme.dart';
 import 'package:vetmate/routes/app_router.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: VetMateApp()));
 }
@@ -19,6 +19,7 @@ class VetMateApp extends ConsumerWidget {
       title: 'VetMate',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

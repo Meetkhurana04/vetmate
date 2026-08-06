@@ -106,14 +106,14 @@ class _CustomButtonState extends State<CustomButton>
           height: 56,
           decoration: BoxDecoration(
             color: widget.onPressed == null
-                ? Colors.grey.shade300
+                ? AppTheme.textLight
                 : buttonColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: widget.onPressed == null
                 ? []
                 : [
                     BoxShadow(
-                      color: buttonColor.withOpacity(0.3),
+                      color: buttonColor.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),

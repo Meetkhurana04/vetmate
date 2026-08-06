@@ -55,7 +55,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         _latitudeController.text = updatedLoc.latitude.toString();
         _longitudeController.text = updatedLoc.longitude.toString();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+           SnackBar(
             content: Text('Coordinates auto-detected successfully!'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppTheme.primaryColor,
@@ -66,7 +66,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to detect coordinates: $e'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppTheme.dangerColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -119,7 +119,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppTheme.dangerColor,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -225,7 +225,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       },
                       child: Text(
                         _isRegistering ? 'Login' : 'Register',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -283,7 +283,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ),
               );
             },
-            child: const Text(
+            child:  Text(
               'Forgot Password?',
               style: TextStyle(
                 color: AppTheme.primaryColor,
@@ -358,8 +358,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           isPassword: true,
           validator: (val) {
             if (val == null || val.isEmpty) return 'Confirm your password';
-            if (val != _passwordController.text)
+            if (val != _passwordController.text) {
               return 'Passwords do not match';
+            }
             return null;
           },
         ),

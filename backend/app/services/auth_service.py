@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
+from datetime import datetime
 from app.repositories.user_repository import user_repository
 from app.utils.password import hash_password, verify_password
 from app.utils.jwt import create_access_token
@@ -213,6 +214,7 @@ class AuthService:
 
     def manage_leave(self, current_user, data):
         from app.config.database import db
+        from app.constants.collections import NOTIFICATIONS_COLLECTION
         
         date_str = data.date.strip()
         action = data.action.upper()
@@ -222,6 +224,34 @@ class AuthService:
                 {"_id": current_user["_id"]},
                 {"$addToSet": {"leaves": date_str}}
             )
+            # Auto-cancel all BOOKED appointments of this doctor on the leave date
+            # and notify the affected patients.
+            affected = list(db.appointments.find({
+                "doctor_id": str(current_user["_id"]),
+                "appointment_date": date_str,
+                "status": "BOOKED"
+            }))
+            doctor_name = current_user.get("name", "Doctor")
+            for apt in affected:
+                db.appointments.update_one(
+                    {"_id": apt["_id"]},
+                    {"$set": {
+                        "status": "CANCELLED",
+                        "cancel_reason": "Doctor on leave"
+                    }}
+                )
+                if apt.get("patient_id"):
+                    db[NOTIFICATIONS_COLLECTION].insert_one({
+                        "user_id": apt["patient_id"],
+                        "type": "APPOINTMENT_CANCELLED",
+                        "title": "Appointment cancelled",
+                        "message": f"Your appointment with {doctor_name} on {date_str} "
+                                   f"at {apt.get('start_time', '')} was cancelled because the doctor is on leave.",
+                        "appointment_date": date_str,
+                        "doctor_name": doctor_name,
+                        "read": False,
+                        "created_at": datetime.now()
+                    })
         else:
             db.users.update_one(
                 {"_id": current_user["_id"]},
@@ -233,5 +263,22 @@ class AuthService:
             "message": "Leave modified successfully",
             "leaves": updated_user.get("leaves", [])
         }
+
+    def get_notifications(self, current_user):
+        from app.config.database import db
+        from app.constants.collections import NOTIFICATIONS_COLLECTION
+        from bson import ObjectId
+
+        notifications = list(
+            db[NOTIFICATIONS_COLLECTION].find(
+                {"user_id": str(current_user["_id"])}
+            ).sort("created_at", -1)
+        )
+        for n in notifications:
+            n["notification_id"] = str(n["_id"])
+            del n["_id"]
+            if "created_at" in n and isinstance(n["created_at"], datetime):
+                n["created_at"] = n["created_at"].isoformat()
+        return notifications
 
 auth_service = AuthService()

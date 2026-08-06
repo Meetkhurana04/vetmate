@@ -9,6 +9,23 @@ class AppTheme {
   static const Color textDark = Color(0xFF1E291B);
   static const Color textLight = Color(0xFF6B7280);
 
+  // ---------- Extended semantic colors (light only) ----------
+  static const Color surfaceColor = Color(0xFFF8FAFC);
+  static const Color elevatedColor = Colors.white;
+  static const Color dividerColor = Color(0xFFE8EAE8);
+  static const Color inputFillColor = Colors.white;
+  static const Color chipColor = Color(0xFFF1F5F9);
+  static const Color cardBorderColor = Color(0xFFE8EAE8);
+  static const Color dangerColor = Colors.redAccent;
+  static const Color successColor = Color(0xFF2E7D32);
+  static const Color warningColor = Color(0xFFF59E0B);
+  static const Color infoColor = Color(0xFF2563EB);
+  static const Color tintColor = Color(0x0A000000);
+  static const Color navBarColor = Colors.white;
+  static const Color gradientStart = Color(0xFF2E7D32);
+  static const Color gradientEnd = Color(0xFF1B5E20);
+  static const Color shadowColor = Color(0x14000000);
+
   static ThemeData get lightTheme {
     final baseTheme = ThemeData(
       useMaterial3: true,

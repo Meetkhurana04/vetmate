@@ -30,19 +30,19 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Keep Slot', style: TextStyle(color: AppTheme.textLight)),
+              child: Text('Keep Slot', style: TextStyle(color: AppTheme.textLight)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
               onPressed: () async {
                 Navigator.pop(context);
                 final success = await ref.read(bookingProvider.notifier).cancelAppointment(appointmentId);
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                     SnackBar(
                       content: Text('Appointment cancelled successfully.'),
                       behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: AppTheme.dangerColor,
                     ),
                   );
                 }
@@ -66,7 +66,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
 
     if (isDoctor) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: AppTheme.surfaceColor,
         appBar: AppBar(
           title: Text(
             'Apply Leaves',
@@ -81,12 +81,12 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.cardColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade100),
+                  border: Border.all(color: AppTheme.cardBorderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: AppTheme.tintColor,
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -109,7 +109,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                       firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                       highlightedDates: Set<String>.from(authState.userLeaves ?? []),
-                      highlightColor: Colors.redAccent,
+                      highlightColor: AppTheme.dangerColor,
                       onDateSelected: (date) {
                         setState(() {
                           _selectedDate = date;
@@ -126,7 +126,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                             children: [
                               Text(
                                 DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.textDark,
@@ -139,7 +139,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                     : 'Available for Bookings',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: isOnLeave ? Colors.redAccent : Colors.green,
+                                  color: isOnLeave ? AppTheme.dangerColor : AppTheme.successColor,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -151,7 +151,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                           onChanged: (val) async {
                             await ref.read(authProvider.notifier).toggleLeave(formattedSelectedDate, val);
                           },
-                          activeColor: Colors.redAccent,
+                          activeThumbColor: AppTheme.dangerColor,
                         ),
                       ],
                     ),
@@ -172,11 +172,11 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade100),
+                    border: Border.all(color: AppTheme.cardBorderColor),
                   ),
-                  child: const Row(
+                  child:  Row(
                     children: [
                       Icon(Icons.info_outline, color: AppTheme.textLight),
                       SizedBox(width: 12),
@@ -203,20 +203,20 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.redAccent.withOpacity(0.15)),
+                        border: Border.all(color: AppTheme.dangerColor.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 20),
+                               Icon(Icons.event_busy_rounded, color: AppTheme.dangerColor, size: 20),
                               const SizedBox(width: 12),
                               Text(
                                 formattedLeave,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                   color: AppTheme.textDark,
@@ -225,12 +225,12 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                             ],
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                            icon:  Icon(Icons.delete_outline_rounded, color: AppTheme.dangerColor, size: 20),
                             onPressed: () async {
                               await ref.read(authProvider.notifier).toggleLeave(leaveDateStr, false);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                   SnackBar(
                                     content: Text('Leave cancelled successfully.'),
                                     behavior: SnackBarBehavior.floating,
                                     backgroundColor: AppTheme.primaryColor,
@@ -253,7 +253,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     final appointments = bookingState.myAppointments;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.surfaceColor,
       appBar: AppBar(
         title: Text(
           'My Appointments',
@@ -282,16 +282,16 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.cardColor,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: AppTheme.tintColor,
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
-                    border: Border.all(color: Colors.grey.shade100, width: 1),
+                    border: Border.all(color: AppTheme.cardBorderColor, width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -311,10 +311,10 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                   return Container(
                                     width: 60,
                                     height: 60,
-                                    color: Colors.grey.shade100,
-                                    child: const Icon(
+                                    color: AppTheme.chipColor,
+                                    child:  Icon(
                                       Icons.medical_services_outlined,
-                                      color: Colors.grey,
+                                      color: AppTheme.textLight,
                                     ),
                                   );
                                 },
@@ -338,7 +338,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                   const SizedBox(height: 3),
                                   Text(
                                     appointment.doctorName,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: AppTheme.primaryColor,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
@@ -350,7 +350,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                           ],
                         ),
                       ),
-                      const Divider(height: 1, color: Color(0xFFF3F3F3)),
+                      Divider(height: 1, color: AppTheme.dividerColor),
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
@@ -358,7 +358,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                 Icon(
                                   Icons.calendar_month_rounded,
                                   size: 16,
                                   color: AppTheme.primaryColor,
@@ -369,7 +369,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                   children: [
                                     Text(
                                       formattedDate,
-                                      style: const TextStyle(
+                                      style:  TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.textDark,
@@ -378,7 +378,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                     const SizedBox(height: 2),
                                     Text(
                                       appointment.slotTime,
-                                      style: const TextStyle(
+                                      style:  TextStyle(
                                         fontSize: 11,
                                         color: AppTheme.textLight,
                                         fontWeight: FontWeight.w500,
@@ -397,10 +397,10 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.primaryColor.withOpacity(0.1),
+                                      color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Row(
+                                    child:  Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
@@ -423,7 +423,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                   const SizedBox(width: 8),
                                   TextButton(
                                     style: TextButton.styleFrom(
-                                      foregroundColor: Colors.redAccent,
+                                      foregroundColor: AppTheme.dangerColor,
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       minimumSize: Size.zero,
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -446,13 +446,13 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
+                                      color: AppTheme.chipColor,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(
                                       'Cancelled',
                                       style: TextStyle(
-                                        color: Colors.grey.shade600,
+                                        color: AppTheme.textLight,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 11,
                                       ),

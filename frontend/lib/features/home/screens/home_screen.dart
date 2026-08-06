@@ -19,6 +19,7 @@ import 'package:vetmate/features/home/screens/pets_screen.dart';
 import 'package:vetmate/features/home/screens/profile_screen.dart';
 import 'package:vetmate/features/location/providers/location_provider.dart';
 import 'package:vetmate/features/location/models/location_model.dart';
+import 'package:vetmate/features/notifications/providers/notification_provider.dart';
 
 final homeTabIndexProvider = StateProvider<int>((ref) {
   return 0;
@@ -37,6 +38,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(bookingProvider.notifier).fetchAppointments();
+      ref.read(notificationProvider.notifier).fetchNotifications();
     });
   }
 
@@ -88,7 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: AppTheme.tintColor,
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -105,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               }
             },
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+            backgroundColor: AppTheme.cardColor,
             selectedItemColor: AppTheme.primaryColor,
             unselectedItemColor: AppTheme.textLight,
             selectedLabelStyle: const TextStyle(
@@ -179,7 +181,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                 borderRadius: BorderRadius.circular(24),
               ),
               elevation: 8,
-              backgroundColor: Colors.white,
+              backgroundColor: AppTheme.cardColor,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -192,12 +194,12 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.1),
+                          color: AppTheme.dangerColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child:  Icon(
                           Icons.location_off_rounded,
-                          color: Colors.redAccent,
+                          color: AppTheme.dangerColor,
                           size: 48,
                         ),
                       ),
@@ -214,7 +216,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                       const SizedBox(height: 12),
                       Text(
                         desc,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 14,
                           color: AppTheme.textLight,
                           height: 1.5,
@@ -249,7 +251,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                                 Navigator.pop(context);
                                 _isDialogShowing = false;
                               },
-                        child: const Text(
+                        child:  Text(
                           'Not Now',
                           style: TextStyle(
                             color: AppTheme.textLight,
@@ -322,10 +324,10 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
             // Small Profile Avatar
             CircleAvatar(
               radius: 20,
-              backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
               child: Text(
                 userName.substring(0, 1).toUpperCase(),
-                style: const TextStyle(
+                style:  TextStyle(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -361,20 +363,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: AppTheme.textDark,
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Notifications is empty.'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-          ),
+          _buildNotificationBell(context),
           const SizedBox(width: 12),
         ],
       ),
@@ -396,11 +385,11 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
               // Search Clinics Bar
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.cardColor,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: AppTheme.tintColor,
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -410,7 +399,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                   onChanged: (val) {
                     ref.read(clinicProvider.notifier).setSearchQuery(val);
                   },
-                  decoration: const InputDecoration(
+                  decoration:  InputDecoration(
                     hintText: 'Search Doctors',
                     prefixIcon: Icon(
                       Icons.search_rounded,
@@ -471,7 +460,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                   padding: const EdgeInsets.symmetric(vertical: 40.0),
                   child: Text(
                     clinicState.errorMessage!,
-                    style: const TextStyle(color: Colors.redAccent),
+                    style:  TextStyle(color: AppTheme.dangerColor),
                     textAlign: TextAlign.center,
                   ),
                 )
@@ -515,6 +504,139 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
     );
   }
 
+  Widget _buildNotificationBell(BuildContext context) {
+    final notifState = ref.watch(notificationProvider);
+    final items = notifState.value ?? const [];
+    final unread = items.where((n) => !n.read).length;
+
+    return Stack(
+      children: [
+        IconButton(
+          icon:  Icon(
+            Icons.notifications_none_rounded,
+            color: AppTheme.textDark,
+          ),
+          onPressed: () {
+            ref.read(notificationProvider.notifier).fetchNotifications();
+            _showNotificationsSheet(context);
+          },
+        ),
+        if (unread > 0)
+          Positioned(
+            right: 6,
+            top: 8,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration:  BoxDecoration(
+                color: AppTheme.dangerColor,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                '$unread',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showNotificationsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Consumer(
+        builder: (context, ref, child) {
+          final items = ref.watch(notificationProvider).value ?? const [];
+          return DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.cardColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                         Text(
+                          'Notifications',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Expanded(
+                      child: items.isEmpty
+                          ?  Center(
+                              child: Text(
+                                'No notifications yet.',
+                                style: TextStyle(color: AppTheme.textLight),
+                              ),
+                            )
+                          : ListView.separated(
+                              controller: scrollController,
+                              itemCount: items.length,
+                              separatorBuilder: (_, _) => const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final n = items[index];
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.12),
+                                    child:  Icon(
+                                      Icons.event_busy_rounded,
+                                      color: AppTheme.primaryColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    n.title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    n.message,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  isThreeLine: true,
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   void _showClinicDetailsDialog(BuildContext context, dynamic clinic) {
     showDialog(
       context: context,
@@ -546,7 +668,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                   const SizedBox(height: 4),
                   Text(
                     clinic.doctorName,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -554,14 +676,14 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 18),
+                       Icon(Icons.star, color: AppTheme.warningColor, size: 18),
                       const SizedBox(width: 4),
                       Text(
                         '${clinic.rating} Rating',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
-                      const Icon(
+                       Icon(
                         Icons.near_me,
                         color: AppTheme.secondaryColor,
                         size: 18,
@@ -574,7 +696,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                   Text(
                     'Location',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -646,19 +768,19 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Keep Slot', style: TextStyle(color: AppTheme.textLight)),
+              child: Text('Keep Slot', style: TextStyle(color: AppTheme.textLight)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
               onPressed: () async {
                 Navigator.pop(context);
                 final success = await ref.read(bookingProvider.notifier).cancelAppointment(appointmentId);
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                     SnackBar(
                       content: Text('Appointment cancelled successfully.'),
                       behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: AppTheme.dangerColor,
                     ),
                   );
                 }
@@ -684,7 +806,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
     final filteredAppointments = allAppointments.where((apt) => _isSameDay(apt.date, _selectedDate)).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.surfaceColor,
       appBar: AppBar(
         titleSpacing: 20,
         toolbarHeight: 70,
@@ -692,10 +814,10 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
               child: Text(
                 userName.isNotEmpty ? userName.substring(0, 1).toUpperCase() : 'U',
-                style: const TextStyle(
+                style:  TextStyle(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -707,7 +829,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                   Text(
                     'Good Morning,',
                     style: TextStyle(
                       fontSize: 13,
@@ -751,7 +873,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+               Text(
                 'View and manage your appointments schedule.',
                 style: TextStyle(fontSize: 14, color: AppTheme.textLight),
               ),
@@ -761,12 +883,12 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.cardColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade100),
+                  border: Border.all(color: AppTheme.cardBorderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: AppTheme.tintColor,
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -779,7 +901,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                           Text(
                             'Schedule Date Filter',
                             style: TextStyle(
                               fontSize: 12,
@@ -842,7 +964,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                       title: 'Cancelled Bookings',
                       value: '${filteredAppointments.where((a) => a.status.toLowerCase() == 'cancelled').length}',
                       icon: Icons.cancel_outlined,
-                      color: Colors.redAccent,
+                      color: AppTheme.dangerColor,
                     ),
                   ),
                 ],
@@ -880,16 +1002,16 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
+                            color: AppTheme.tintColor,
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
-                        border: Border.all(color: Colors.grey.shade100, width: 1),
+                        border: Border.all(color: AppTheme.cardBorderColor, width: 1),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -909,10 +1031,10 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                       return Container(
                                         width: 60,
                                         height: 60,
-                                        color: Colors.grey.shade100,
-                                        child: const Icon(
+                                        color: AppTheme.chipColor,
+                                        child:  Icon(
                                           Icons.medical_services_outlined,
-                                          color: Colors.grey,
+                                          color: AppTheme.textLight,
                                         ),
                                       );
                                     },
@@ -936,7 +1058,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                       const SizedBox(height: 3),
                                       Text(
                                         appointment.doctorName, // Holds patient name for doctors
-                                        style: const TextStyle(
+                                        style:  TextStyle(
                                           color: AppTheme.primaryColor,
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
@@ -948,7 +1070,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                               ],
                             ),
                           ),
-                          const Divider(height: 1, color: Color(0xFFF3F3F3)),
+                          Divider(height: 1, color: AppTheme.dividerColor),
                           Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
@@ -956,7 +1078,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(
+                                     Icon(
                                       Icons.calendar_month_rounded,
                                       size: 16,
                                       color: AppTheme.primaryColor,
@@ -967,7 +1089,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                       children: [
                                         Text(
                                           formattedDate,
-                                          style: const TextStyle(
+                                          style:  TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: AppTheme.textDark,
@@ -976,7 +1098,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                         const SizedBox(height: 2),
                                         Text(
                                           appointment.slotTime,
-                                          style: const TextStyle(
+                                          style:  TextStyle(
                                             fontSize: 11,
                                             color: AppTheme.textLight,
                                             fontWeight: FontWeight.w500,
@@ -995,10 +1117,10 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.1),
+                                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(10),
                                         ),
-                                        child: const Row(
+                                        child:  Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
@@ -1021,7 +1143,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                       const SizedBox(width: 8),
                                       TextButton(
                                         style: TextButton.styleFrom(
-                                          foregroundColor: Colors.redAccent,
+                                          foregroundColor: AppTheme.dangerColor,
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           minimumSize: Size.zero,
                                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1044,13 +1166,13 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.grey.shade100,
+                                          color: AppTheme.chipColor,
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Text(
                                           'Cancelled',
                                           style: TextStyle(
-                                            color: Colors.grey.shade600,
+                                            color: AppTheme.textLight,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 11,
                                           ),
@@ -1083,11 +1205,11 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppTheme.tintColor,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1099,7 +1221,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -1116,7 +1238,7 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 13,
               color: AppTheme.textLight,
               fontWeight: FontWeight.w500,
@@ -1212,12 +1334,12 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.15)),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.04),
+            color: AppTheme.primaryColor.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1237,13 +1359,13 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const Icon(Icons.location_on_rounded, color: AppTheme.primaryColor),
+                  Icon(Icons.location_on_rounded, color: AppTheme.primaryColor),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                         Text(
                           'Your Location',
                           style: TextStyle(
                             fontSize: 13,
@@ -1256,7 +1378,7 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
                           currentLoc != null && currentLoc.cityName != null
                               ? currentLoc.cityName!
                               : 'Tap to detect or search',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 12,
                             color: AppTheme.textLight,
                           ),
@@ -1273,7 +1395,7 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
             ),
           ),
           if (_isExpanded) ...[
-            const Divider(height: 1, color: Color(0xFFF3F3F3)),
+            Divider(height: 1, color: AppTheme.dividerColor),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -1329,13 +1451,13 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
                     label: const Text('Detect My Location'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.primaryColor,
-                      side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.4)),
+                      side: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.4)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   if (_results.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    const Text(
+                     Text(
                       'Select a location',
                       style: TextStyle(
                         fontSize: 12,
@@ -1347,7 +1469,7 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
                     ..._results.map((r) => ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.place_outlined, color: AppTheme.primaryColor),
+                          leading: Icon(Icons.place_outlined, color: AppTheme.primaryColor),
                           title: Text(
                             r.cityName ?? 'Location',
                             style: const TextStyle(fontSize: 13),

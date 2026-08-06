@@ -191,8 +191,8 @@ class AuthRepository {
         'phone': phone,
         'password': password,
         'role': role,
-        if (latitude != null) 'latitude': latitude,
-        if (longitude != null) 'longitude': longitude,
+        'latitude': ?latitude,
+        'longitude': ?longitude,
       },
     );
 
@@ -262,8 +262,8 @@ class AuthRepository {
       body: {
         'name': name,
         'phone': phone,
-        if (latitude != null) 'latitude': latitude,
-        if (longitude != null) 'longitude': longitude,
+        'latitude': ?latitude,
+        'longitude': ?longitude,
       },
     );
 

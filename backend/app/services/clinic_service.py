@@ -62,8 +62,24 @@ class ClinicService:
             res["_id"] = str(res["_id"])
         return res
 
-    def get_clinics(self, lat: float = None, lng: float = None):
+    def get_clinics(self, lat: float = None, lng: float = None, leave_date: str = None):
+        from app.config.database import db
+
+        # Doctors on leave for the target date (default: today) are hidden from search.
+        if leave_date is None:
+            leave_date = date.today().isoformat()
+        on_leave_doctor_ids = set()
+        try:
+            for doc in db.users.find({"role": "DOCTOR", "leaves": leave_date}, {"_id": 1}):
+                on_leave_doctor_ids.add(str(doc["_id"]))
+        except Exception:
+            pass
+
         clinics = clinic_repository.find_all()
+        clinics = [
+            c for c in clinics
+            if c.get("doctor_id") not in on_leave_doctor_ids
+        ]
         for clinic in clinics:
             if "_id" in clinic:
                 clinic["_id"] = str(clinic["_id"])

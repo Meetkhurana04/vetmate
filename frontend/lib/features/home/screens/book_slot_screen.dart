@@ -56,7 +56,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(bookingState.error!),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppTheme.dangerColor,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -73,7 +73,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
             borderRadius: BorderRadius.circular(24),
           ),
           elevation: 10,
-          backgroundColor: Colors.white,
+          backgroundColor: AppTheme.cardColor,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
@@ -82,10 +82,10 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child:  Icon(
                     Icons.check_circle_rounded,
                     color: AppTheme.primaryColor,
                     size: 64,
@@ -104,7 +104,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'Your appointment slot at ${clinic.name} is reserved. We have successfully triggered the API locking protocol.',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 14,
                     color: AppTheme.textLight,
                     height: 1.5,
@@ -126,7 +126,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                     Navigator.pop(context); // Close dialog
                     context.pop(); // Pop booking screen
                   },
-                  child: const Text(
+                  child:  Text(
                     'Back to Home',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -183,7 +183,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
           // Clinic Summary Header
           Container(
             padding: const EdgeInsets.all(20),
-            color: Colors.white,
+            color: AppTheme.cardColor,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -198,10 +198,10 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                       return Container(
                         width: 90,
                         height: 90,
-                        color: Colors.grey.shade100,
-                        child: const Icon(
+                        color: AppTheme.chipColor,
+                        child:  Icon(
                           Icons.medical_services_outlined,
-                          color: Colors.grey,
+                          color: AppTheme.textLight,
                         ),
                       );
                     },
@@ -225,7 +225,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                       const SizedBox(height: 4),
                       Text(
                         clinic.doctorName,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -234,15 +234,15 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(
+                           Icon(
                             Icons.star_rounded,
-                            color: Colors.amber,
+                            color: AppTheme.warningColor,
                             size: 18,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             clinic.rating.toString(),
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                               color: AppTheme.textDark,
@@ -251,7 +251,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                           const SizedBox(width: 16),
                           Icon(
                             Icons.location_on_rounded,
-                            color: Colors.redAccent.withOpacity(0.8),
+                            color: AppTheme.dangerColor.withValues(alpha: 0.8),
                             size: 16,
                           ),
                           const SizedBox(width: 4),
@@ -274,7 +274,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          Divider(height: 1, color: AppTheme.dividerColor),
 
           // Main Interactive Body
           Expanded(
@@ -343,14 +343,14 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
 
                   // Slots Grid
                   if (bookingState.isLoadingSlots)
-                    const Padding(
+                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
                       child: Center(
                         child: CircularProgressIndicator(color: AppTheme.primaryColor),
                       ),
                     )
                   else if (slots.isEmpty)
-                    const Padding(
+                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
                       child: Center(
                         child: Text(
@@ -381,30 +381,28 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                         final isSelected = _selectedSlotId == slot.id;
 
                         // Styling states
-                        Color bgColor = Colors.white;
+                        Color bgColor = AppTheme.cardColor;
                         Color textColor = AppTheme.textDark;
-                        Color borderColor = Colors.grey.shade200;
+                        Color borderColor = AppTheme.cardBorderColor;
                         Widget? suffixIcon;
                         String statusLabel = '';
 
                         if (slot.isBooked) {
                           // Already Booked - Disabled
-                          bgColor = Colors.grey.shade100;
-                          textColor = Colors.grey.shade400;
-                          borderColor = Colors.grey.shade200;
+                          bgColor = AppTheme.chipColor;
+                          textColor = AppTheme.textLight;
+                          borderColor = AppTheme.cardBorderColor;
                           statusLabel = 'Booked';
                           suffixIcon = Icon(
                             Icons.lock_outline_rounded,
                             size: 11,
-                            color: Colors.grey.shade400,
+                            color: AppTheme.textLight,
                           );
                         } else if (!slot.isAvailable) {
                           // Lunch Break (1 PM - 2 PM) - Disabled
-                          bgColor = const Color(
-                            0xFFFFF3E0,
-                          ); // very soft light orange
-                          textColor = Colors.orange.shade800;
-                          borderColor = Colors.orange.shade100;
+                          bgColor = AppTheme.warningColor.withValues(alpha: 0.12);
+                          textColor = AppTheme.warningColor;
+                          borderColor = AppTheme.warningColor.withValues(alpha: 0.3);
                           statusLabel = 'Break';
                         } else if (isSelected) {
                           // Selected by user
@@ -466,7 +464,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: textColor.withOpacity(0.8),
+                                      color: textColor.withValues(alpha: 0.8),
                                     ),
                                   ),
                                 ],
@@ -486,10 +484,10 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: AppTheme.tintColor,
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -505,7 +503,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                         Text(
                           'Selected Slot:',
                           style: TextStyle(
                             fontSize: 14,
@@ -515,7 +513,7 @@ class _BookSlotScreenState extends ConsumerState<BookSlotScreen> {
                         ),
                         Text(
                           '${DateFormat('EEEE, d MMM').format(_selectedDate)} at $_selectedSlotTime',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,

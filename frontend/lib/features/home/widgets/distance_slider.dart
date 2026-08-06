@@ -17,11 +17,11 @@ class DistanceSlider extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: AppTheme.tintColor,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -47,12 +47,12 @@ class DistanceSlider extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   value >= 50.0 ? 'View All' : '${value.toStringAsFixed(0)} km',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -65,7 +65,7 @@ class DistanceSlider extends StatelessWidget {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppTheme.primaryColor,
-              inactiveTrackColor: Colors.grey.shade100,
+              inactiveTrackColor: AppTheme.dividerColor,
               trackHeight: 6.0,
               thumbColor: AppTheme.primaryColor,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
@@ -80,12 +80,12 @@ class DistanceSlider extends StatelessWidget {
               onChanged: onChanged,
             ),
           ),
-          const Row(
+           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('1 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
-              Text('25 km', style: TextStyle(color: Colors.grey, fontSize: 11)),
-              Text('View All', style: TextStyle(color: Colors.grey, fontSize: 11)),
+              Text('1 km', style: TextStyle(color: AppTheme.textLight, fontSize: 11)),
+              Text('25 km', style: TextStyle(color: AppTheme.textLight, fontSize: 11)),
+              Text('View All', style: TextStyle(color: AppTheme.textLight, fontSize: 11)),
             ],
           ),
         ],

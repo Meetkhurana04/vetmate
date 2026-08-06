@@ -63,7 +63,7 @@ class ClinicRepository {
     final response = await _httpService.get(
       '/clinics/$clinicId/slots',
       queryParameters: {
-        if (date != null) 'date': date,
+        'date': ?date,
       },
     );
     final List<dynamic> data = jsonDecode(response.body);

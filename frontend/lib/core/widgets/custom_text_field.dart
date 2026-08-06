@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vetmate/core/theme/app_theme.dart';
 
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -47,7 +48,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   _obscureText
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: Colors.grey,
+                  color: AppTheme.textLight,
                 ),
                 onPressed: () {
                   setState(() {

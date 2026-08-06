@@ -23,7 +23,7 @@ class ProfileScreen extends ConsumerWidget {
         : 'Pet Owner';
     final userCity = locationState.when(
       data: (loc) => loc.cityName ?? 'Jaipur, Rajasthan',
-      error: (_, __) => 'Jaipur, Rajasthan',
+      error: (_, _) => 'Jaipur, Rajasthan',
       loading: () => 'Detecting location...',
     );
 
@@ -47,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                     child: Text(
                       userName.isNotEmpty ? userName.substring(0, 1).toUpperCase() : 'U',
                       style: GoogleFonts.outfit(
@@ -59,13 +59,13 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
+                    decoration:  BoxDecoration(
                       color: AppTheme.primaryColor,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.camera_alt_outlined,
-                      color: Colors.white,
+                      color: AppTheme.cardColor,
                       size: 18,
                     ),
                   ),
@@ -92,12 +92,12 @@ class ProfileScreen extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.08),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       userRole,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -161,16 +161,16 @@ class ProfileScreen extends ConsumerWidget {
                 _showLogoutConfirmDialog(context, ref);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
+                backgroundColor: AppTheme.dangerColor,
                 foregroundColor: Colors.white,
-                shadowColor: Colors.redAccent.withOpacity(0.3),
+                shadowColor: AppTheme.dangerColor.withValues(alpha: 0.3),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.logout_rounded),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text('Logout Account'),
                 ],
               ),
@@ -191,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: AppTheme.surfaceColor,
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: AppTheme.textLight, size: 20),
@@ -203,12 +203,12 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(color: AppTheme.textLight, fontSize: 12),
+                style: TextStyle(color: AppTheme.textLight, fontSize: 12),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                   color: AppTheme.textDark,
@@ -304,7 +304,7 @@ class ProfileScreen extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: AppTheme.textLight)),
+                  child: Text('Cancel', style: TextStyle(color: AppTheme.textLight)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -318,10 +318,10 @@ class ProfileScreen extends ConsumerWidget {
                       );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                           SnackBar(
                             content: Text('Profile updated successfully.'),
                             behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.green,
+                            backgroundColor: AppTheme.successColor,
                           ),
                         );
                       }
@@ -352,7 +352,7 @@ class ProfileScreen extends ConsumerWidget {
           content: const Text('Are you sure you want to log out of VetMate?'),
           actions: [
             TextButton(
-              child: const Text(
+              child:  Text(
                 'Cancel',
                 style: TextStyle(color: AppTheme.textLight),
               ),
@@ -360,7 +360,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
+                backgroundColor: AppTheme.dangerColor,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,

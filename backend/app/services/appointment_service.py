@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from pymongo.errors import DuplicateKeyError
+
 from app.repositories.appointment_repository import appointment_repository
 
 from app.repositories.doctor_repository import doctor_schedule_repository
@@ -210,11 +212,17 @@ class AppointmentService:
         }
 
 
-        appointment_id = (
-            appointment_repository.create(
-                appointment
+        try:
+            appointment_id = (
+                appointment_repository.create(
+                    appointment
+                )
             )
-        )
+        except DuplicateKeyError:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Slot already booked",
+            )
 
         return {
             "message": "Appointment booked successfully",

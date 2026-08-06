@@ -15,9 +15,10 @@ def create_clinic(data: dict, current_user = Depends(get_current_user)):
 @router.get("")
 def get_clinics(
     lat: Optional[float] = Query(None),
-    lng: Optional[float] = Query(None)
+    lng: Optional[float] = Query(None),
+    date: Optional[str] = Query(None)
 ):
-    return clinic_service.get_clinics(lat, lng)
+    return clinic_service.get_clinics(lat, lng, leave_date=date)
 
 @router.get("/{clinic_id}/slots")
 def get_clinic_slots(

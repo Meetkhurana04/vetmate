@@ -42,11 +42,11 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
           width: widget.size,
           height: widget.size,
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.15),
+            color: AppTheme.primaryColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
             border: Border.all(color: AppTheme.primaryColor, width: 2),
           ),
-          child: const Center(
+          child:  Center(
             child: Icon(
               Icons.pets_rounded,
               color: AppTheme.primaryColor,

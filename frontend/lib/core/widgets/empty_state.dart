@@ -29,7 +29,7 @@ class EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.08),
+                color: AppTheme.primaryColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 64, color: AppTheme.primaryColor),

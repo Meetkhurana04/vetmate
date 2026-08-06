@@ -155,16 +155,16 @@ class _RoleCardState extends State<_RoleCard>
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: AppTheme.tintColor,
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
             ],
-            border: Border.all(color: Colors.grey.shade100, width: 1),
+            border: Border.all(color: AppTheme.cardBorderColor, width: 1),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +172,7 @@ class _RoleCardState extends State<_RoleCard>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: widget.color.withOpacity(0.1),
+                  color: widget.color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(widget.icon, color: widget.color, size: 28),
@@ -206,7 +206,7 @@ class _RoleCardState extends State<_RoleCard>
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
-                color: widget.color.withOpacity(0.4),
+                color: widget.color.withValues(alpha: 0.4),
               ),
             ],
           ),

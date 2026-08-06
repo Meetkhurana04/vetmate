@@ -37,12 +37,12 @@ class ClinicCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 180,
-                      color: Colors.grey.shade200,
-                      child: const Center(
+                      color: AppTheme.chipColor,
+                      child:  Center(
                         child: Icon(
                           Icons.broken_image_outlined,
                           size: 48,
-                          color: Colors.grey,
+                          color: AppTheme.textLight,
                         ),
                       ),
                     );
@@ -61,7 +61,7 @@ class ClinicCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: clinic.isOpen
                         ? AppTheme.primaryColor
-                        : Colors.grey.shade700,
+                        : AppTheme.textDark,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -85,12 +85,12 @@ class ClinicCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                         Icon(
                           Icons.location_on_rounded,
                           color: AppTheme.secondaryColor,
                           size: 14,
@@ -133,15 +133,15 @@ class ClinicCard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        const Icon(
+                         Icon(
                           Icons.star_rounded,
-                          color: Colors.amber,
+                          color: AppTheme.warningColor,
                           size: 20,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           clinic.rating.toString(),
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: AppTheme.textDark,
@@ -154,7 +154,7 @@ class ClinicCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   clinic.name,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -166,7 +166,7 @@ class ClinicCard extends StatelessWidget {
                     Icon(
                       Icons.near_me_outlined,
                       size: 16,
-                      color: Colors.grey.shade400,
+                      color: AppTheme.textLight,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
