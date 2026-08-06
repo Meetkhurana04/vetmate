@@ -1175,17 +1175,20 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                           ),
                                         ),
                                       ),
-                                    ] else ...[
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.chipColor,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
+] else ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.chipColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
                                           'Cancelled',
                                           style: TextStyle(
                                             color: AppTheme.textLight,
@@ -1193,8 +1196,30 @@ class _DoctorDashboardViewState extends ConsumerState<_DoctorDashboardView> {
                                             fontSize: 11,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                          onTap: () {
+                                            ref
+                                                .read(bookingProvider.notifier)
+                                                .removeCancelledAppointment(appointment.id);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: const Text('Removed from list'),
+                                                behavior: SnackBarBehavior.floating,
+                                                backgroundColor: AppTheme.successColor,
+                                              ),
+                                            );
+                                          },
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            size: 14,
+                                            color: AppTheme.textLight,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                                   ],
                                 ),
                               ],

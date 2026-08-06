@@ -17,7 +17,7 @@ class LocationNotifier extends StateNotifier<AsyncValue<UserLocation>> {
 
   LocationNotifier(this._repository, this._searchService)
       : super(const AsyncValue.loading()) {
-    fetchLocation(requestPermission: false);
+    fetchLocation(requestPermission: true);
   }
 
   Future<void> fetchLocation({bool requestPermission = false}) async {

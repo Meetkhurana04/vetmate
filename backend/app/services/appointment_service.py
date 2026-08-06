@@ -299,7 +299,7 @@ class AppointmentService:
 
     def cancel_appointment(self, current_user, appointment_id: str):
         from bson import ObjectId
-        from datetime import datetime
+        from datetime import datetime, timedelta
         from fastapi import HTTPException, status
         from app.config.database import db
         from app.constants.collections import NOTIFICATIONS_COLLECTION
@@ -326,6 +326,21 @@ class AppointmentService:
             )
 
         already_cancelled = appointment.get("status") == "CANCELLED"
+        
+        # Check 30-minute cancellation rule
+        apt_date_str = appointment.get("appointment_date", "")
+        apt_time_str = appointment.get("start_time", "")
+        if apt_date_str and apt_time_str:
+            try:
+                apt_datetime = datetime.strptime(f"{apt_date_str} {apt_time_str}", "%Y-%m-%d %H:%M")
+                if apt_datetime - datetime.now() < timedelta(minutes=30):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Appointments can only be cancelled more than 30 minutes before the scheduled time"
+                    )
+            except ValueError:
+                pass  # If parsing fails, skip the check (should not happen with valid data)
+        
         appointment_repository.cancel(appointment_id)
 
         if not already_cancelled:

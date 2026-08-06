@@ -449,13 +449,38 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                                       color: AppTheme.chipColor,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text(
-                                      'Cancelled',
-                                      style: TextStyle(
-                                        color: AppTheme.textLight,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
-                                      ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Cancelled',
+                                          style: TextStyle(
+                                            color: AppTheme.textLight,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                          onTap: () {
+                                            ref
+                                                .read(bookingProvider.notifier)
+                                                .removeCancelledAppointment(appointment.id);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: const Text('Removed from list'),
+                                                behavior: SnackBarBehavior.floating,
+                                                backgroundColor: AppTheme.successColor,
+                                              ),
+                                            );
+                                          },
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            size: 14,
+                                            color: AppTheme.textLight,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

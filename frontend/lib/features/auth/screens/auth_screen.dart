@@ -141,9 +141,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Form(
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
@@ -240,10 +243,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ],
             ),
           ),
-        ),
+),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLoginFields() {
     return Column(

@@ -203,6 +203,13 @@ class BookingNotifier extends StateNotifier<BookingState> {
   void resetBookingStatus() {
     state = state.copyWith(isBookingSuccess: false, error: null);
   }
+
+  void removeCancelledAppointment(String appointmentId) {
+    final updatedAppointments = state.myAppointments
+        .where((apt) => apt.id != appointmentId)
+        .toList();
+    state = state.copyWith(myAppointments: updatedAppointments);
+  }
 }
 
 final bookingProvider = StateNotifierProvider<BookingNotifier, BookingState>((
