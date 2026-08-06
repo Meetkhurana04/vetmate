@@ -575,7 +575,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Coordinates',
+                    'Location',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
@@ -583,7 +583,7 @@ class _HomeDashboardViewState extends ConsumerState<_HomeDashboardView> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Lat: ${clinic.latitude}, Lng: ${clinic.longitude}', style: const TextStyle(fontSize: 13)),
+                  Text(clinic.address, style: const TextStyle(fontSize: 13)),
                   const SizedBox(height: 24),
                   Row(
                     children: [
@@ -1136,25 +1136,72 @@ class _TemporaryLocationSelector extends ConsumerStatefulWidget {
 }
 
 class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSelector> {
-  final _latController = TextEditingController();
-  final _lngController = TextEditingController();
+  final _searchController = TextEditingController();
+  List<UserLocation> _results = const [];
+  bool _isSearching = false;
   bool _isExpanded = false;
 
   @override
-  void initState() {
-    super.initState();
-    final locationVal = ref.read(locationProvider).value;
-    if (locationVal != null) {
-      _latController.text = locationVal.latitude.toString();
-      _lngController.text = locationVal.longitude.toString();
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _detectLocation() async {
+    setState(() => _isSearching = true);
+    try {
+      await ref.read(locationProvider.notifier).fetchLocation(requestPermission: true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not detect location. Try searching below.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSearching = false);
     }
   }
 
-  @override
-  void dispose() {
-    _latController.dispose();
-    _lngController.dispose();
-    super.dispose();
+  Future<void> _search() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+    setState(() => _isSearching = true);
+    try {
+      final results =
+          await ref.read(locationProvider.notifier).searchLocations(query);
+      if (mounted) setState(() => _results = results);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Search failed. Please try again.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSearching = false);
+    }
+  }
+
+  void _selectLocation(UserLocation location) {
+    ref.read(locationProvider.notifier).setSelectedLocation(location);
+    _searchController.clear();
+    setState(() {
+      _results = const [];
+      _isExpanded = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Location set to ${location.cityName}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppTheme.primaryColor,
+      ),
+    );
   }
 
   @override
@@ -1190,14 +1237,14 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const Icon(Icons.pin_drop_rounded, color: AppTheme.primaryColor),
+                  const Icon(Icons.location_on_rounded, color: AppTheme.primaryColor),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Search Doctor by Coordinates',
+                          'Your Location',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -1206,11 +1253,11 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          currentLoc != null
-                              ? 'Lat: ${currentLoc.latitude.toStringAsFixed(4)}, Lng: ${currentLoc.longitude.toStringAsFixed(4)}'
-                              : 'Not Set',
+                          currentLoc != null && currentLoc.cityName != null
+                              ? currentLoc.cityName!
+                              : 'Tap to detect or search',
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: AppTheme.textLight,
                           ),
                         ),
@@ -1230,76 +1277,88 @@ class _TemporaryLocationSelectorState extends ConsumerState<_TemporaryLocationSe
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          controller: _latController,
-                          decoration: const InputDecoration(
-                            labelText: 'Search Latitude',
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: TextField(
+                          controller: _searchController,
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (_) => _search(),
+                          decoration: InputDecoration(
+                            hintText: 'Search area e.g. Sector 4, Shanti Nagar',
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _lngController,
-                          decoration: const InputDecoration(
-                            labelText: 'Search Longitude',
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          final authState = ref.read(authProvider);
-                          if (authState.userLatitude != null && authState.userLongitude != null) {
-                            setState(() {
-                              _latController.text = authState.userLatitude.toString();
-                              _lngController.text = authState.userLongitude.toString();
-                            });
-                            ref.read(locationProvider.notifier).setTemporaryLocation(
-                                  authState.userLatitude!,
-                                  authState.userLongitude!,
-                                );
-                          }
-                        },
-                        child: const Text('Reset to Profile'),
-                      ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        onPressed: () {
-                          final lat = double.tryParse(_latController.text.trim());
-                          final lng = double.tryParse(_lngController.text.trim());
-                          if (lat != null && lng != null) {
-                            ref.read(locationProvider.notifier).setTemporaryLocation(lat, lng);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Temporary coordinates applied.'),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: AppTheme.primaryColor,
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Apply'),
+                        onPressed: _search,
+                        child: _isSearching
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Search'),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _detectLocation,
+                    icon: _isSearching
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.my_location_rounded, size: 18),
+                    label: const Text('Detect My Location'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryColor,
+                      side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.4)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  if (_results.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Select a location',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textLight,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ..._results.map((r) => ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.place_outlined, color: AppTheme.primaryColor),
+                          title: Text(
+                            r.cityName ?? 'Location',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                          subtitle: Text(
+                            '${r.latitude.toStringAsFixed(4)}, ${r.longitude.toStringAsFixed(4)}',
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          onTap: () => _selectLocation(r),
+                        )),
+                  ],
                 ],
               ),
             ),

@@ -121,7 +121,7 @@ class ClinicCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        clinic.name,
+                        clinic.doctorName,
                         style: GoogleFonts.outfit(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -153,7 +153,7 @@ class ClinicCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  clinic.doctorName,
+                  clinic.name,
                   style: const TextStyle(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.w600,

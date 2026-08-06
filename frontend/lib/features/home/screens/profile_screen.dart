@@ -129,10 +129,12 @@ class ProfileScreen extends ConsumerWidget {
                     const Divider(height: 32),
                     _buildProfileItem(
                       icon: Icons.location_searching_rounded,
-                      title: 'Coordinates (Lat, Long)',
-                      value: authState.userLatitude != null && authState.userLongitude != null
-                          ? '${authState.userLatitude!.toStringAsFixed(4)}, ${authState.userLongitude!.toStringAsFixed(4)}'
-                          : 'Not Configured',
+                      title: 'Location',
+                      value: locationState.value?.cityName != null
+                          ? locationState.value!.cityName!
+                          : (authState.userLatitude != null && authState.userLongitude != null
+                              ? '${authState.userLatitude!.toStringAsFixed(4)}, ${authState.userLongitude!.toStringAsFixed(4)}'
+                              : 'Not Configured'),
                     ),
                   ],
                 ),

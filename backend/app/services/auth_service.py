@@ -114,10 +114,10 @@ class AuthService:
             
             clinic_data = {
                 "id": clinic["id"] if clinic else f"c_{user['_id']}",
-                "name": clinic_name,
-                "doctorName": doctor_name,
-                "latitude": user.get("latitude") or 26.9124,
-                "longitude": user.get("longitude") or 75.7873,
+                "name": clinic.get("name") if clinic else clinic_name,
+                "doctorName": clinic.get("doctorName") if clinic else doctor_name,
+                "latitude": user.get("latitude") or (clinic.get("latitude") if clinic else 26.9124),
+                "longitude": user.get("longitude") or (clinic.get("longitude") if clinic else 75.7873),
                 "rating": clinic.get("rating") if clinic else 4.5,
                 "address": clinic.get("address") if clinic else "Jaipur",
                 "isOpen": True,
