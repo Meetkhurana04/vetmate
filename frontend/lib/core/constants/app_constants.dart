@@ -20,5 +20,5 @@ class AppConstants {
   static const double defaultLongitude = 75.7873;
 
   // Base URL for the dynamic backend API
-  static const String apiBaseUrl = 'http://10.0.2.2:8000';
+  static const String apiBaseUrl = 'http://172.24.46.254:8000';
 }
